@@ -4,8 +4,7 @@ import torchvision
 
 lr = 0.1
 num_epochs = 10
-num_inputs = 28 * 28
-num_outputs = 10
+num_inputs, num_hiddens, num_outputs = 28 * 28, 256, 10
 batch_size = 256
 
 mnist_train = torchvision.datasets.FashionMNIST(
@@ -32,7 +31,7 @@ print("y type:", type(y))  # int
 def data_iter(dataset, batch_size):
     from torch.utils import data
 
-    return iter(data.DataLoader(dataset, batch_size=batch_size))
+    return iter(data.DataLoader(dataset, batch_size=batch_size, shuffle=True))
 
 
 mnist_titles = [
@@ -77,6 +76,10 @@ def show_images(imgs, num_rows, num_cols, titles=None, scale=1.5):
 # show_images(X.reshape(18, 28, 28), 2, 9, titles=titles)
 
 
+def relu(X):
+    return torch.max(X, torch.zeros_like(X))
+
+
 def softmax(X):
     X_exp = torch.exp(X)
     return X_exp / X_exp.sum(1, keepdim=True)
@@ -93,14 +96,36 @@ def sgd(params, lr, batch_size):
             param.grad.zero_()
 
 
-## hard:
+## hard 1 layer:
 # W = torch.normal(0, 0.01, size=(num_inputs, num_outputs), requires_grad=True)
 # b = torch.zeros(num_outputs, requires_grad=True)
 # net = lambda X: softmax(X.reshape(-1, num_inputs) @ W + b)
 # loss = cross_entropy
 # optimize = lambda: sgd([W, b], lr, batch_size)
 
-net = nn.Sequential(nn.Flatten(), nn.Linear(num_inputs, num_outputs))
+## easy 1 layer:
+# net = nn.Sequential(nn.Flatten(), nn.Linear(num_inputs, num_outputs))
+# loss = nn.CrossEntropyLoss()
+# optimizer = optim.SGD(net.parameters(), lr=lr)
+# optimize = lambda: (optimizer.step(), optimizer.zero_grad())
+
+## hard 2 layer:
+# W1 = torch.normal(0, 0.01, size=(num_inputs, num_hiddens), requires_grad=True)
+# b1 = torch.zeros((), requires_grad=True)
+# W2 = torch.normal(0, 0.01, size=(num_hiddens, num_outputs), requires_grad=True)
+# b2 = torch.zeros((), requires_grad=True)
+# net = lambda X: softmax(relu(X.reshape(-1, num_inputs) @ W1 + b1) @ W2 + b2)
+# loss = cross_entropy
+# optimize = lambda: sgd([W1, b1, W2, b2], lr, batch_size)
+
+
+## easy 2 layer:
+net = nn.Sequential(
+    nn.Flatten(),
+    nn.Linear(num_inputs, num_hiddens),
+    nn.ReLU(),
+    nn.Linear(num_hiddens, num_outputs),
+)
 loss = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(), lr=lr)
 optimize = lambda: (optimizer.step(), optimizer.zero_grad())
