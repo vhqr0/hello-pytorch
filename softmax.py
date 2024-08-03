@@ -111,9 +111,9 @@ def sgd(params, lr, batch_size):
 
 ## hard 2 layer:
 # W1 = torch.normal(0, 0.01, size=(num_inputs, num_hiddens), requires_grad=True)
-# b1 = torch.zeros((), requires_grad=True)
+# b1 = torch.zeros(num_hiddens, requires_grad=True)
 # W2 = torch.normal(0, 0.01, size=(num_hiddens, num_outputs), requires_grad=True)
-# b2 = torch.zeros((), requires_grad=True)
+# b2 = torch.zeros(num_outputs, requires_grad=True)
 # net = lambda X: softmax(relu(X.reshape(-1, num_inputs) @ W1 + b1) @ W2 + b2)
 # loss = cross_entropy
 # optimize = lambda: sgd([W1, b1, W2, b2], lr, batch_size)
