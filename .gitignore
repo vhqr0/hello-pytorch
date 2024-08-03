@@ -1,0 +1,5 @@
+pyrightconfig.json
+.python-version
+*.pth
+
+/data
